@@ -78,6 +78,8 @@ export type EditableTableProps<TData extends object> = {
 
   actions?: TableActionsConfig<TData>;
 
+  headerActions?: React.ReactNode;
+
   /**
    * Nueva fila arriba de la tabla.
    * Solo aparece si allowCreate = true.

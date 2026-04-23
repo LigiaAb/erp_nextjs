@@ -1,14 +1,12 @@
 import { z } from "zod";
 
+/**
+ * 🔴 CAMBIAR: campos reales y sus validaciones.
+ */
 export const formSchema = z.object({
-  empresa: z
-    .object({
-      label: z.string(),
-      value: z.number(),
-    })
-    .nullable(),
-
-  nombre: z.string().min(1, "Requerido"),
-
-  fechaInicio: z.date().nullable(),
+  nombre: z.string().min(1, "El nombre es requerido"),
+  descripcion: z.string().optional(),
 });
+
+// Tipo automático: no lo escribas dos veces
+export type FormValues = z.infer<typeof formSchema>;

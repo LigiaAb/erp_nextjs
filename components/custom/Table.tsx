@@ -107,7 +107,12 @@ function normalizeDateInput(value: unknown) {
   return "";
 }
 
-function defaultDisplayValue<TData extends object>(value: TData[keyof TData], row: TData, column: EditableColumn<TData>, options?: SelectOption[]): React.ReactNode {
+function defaultDisplayValue<TData extends object>(
+  value: TData[keyof TData],
+  row: TData,
+  column: EditableColumn<TData>,
+  options?: SelectOption[],
+): React.ReactNode {
   if (column.format) return column.format(value, row);
 
   if (column.type === "checkbox") return value ? "Sí" : "No";
@@ -221,7 +226,13 @@ function resolveActionVisibility<TData extends object>(rule: ActionVisibility<TD
  * Cell editor
  * ========================================================================== */
 
-function CellEditor<TData extends object>(props: { row: TData; column: EditableColumn<TData>; value: unknown; compact: boolean; onChange: (value: unknown) => void }) {
+function CellEditor<TData extends object>(props: {
+  row: TData;
+  column: EditableColumn<TData>;
+  value: unknown;
+  compact: boolean;
+  onChange: (value: unknown) => void;
+}) {
   const { row, column, value, compact, onChange } = props;
 
   if (column.editor) {
@@ -296,7 +307,13 @@ function CellEditor<TData extends object>(props: { row: TData; column: EditableC
     case "text":
     default:
       return (
-        <Input type="text" value={value === null || value === undefined ? "" : String(value)} placeholder={column.placeholder} className={commonClassName} onChange={(e) => onChange(e.target.value)} />
+        <Input
+          type="text"
+          value={value === null || value === undefined ? "" : String(value)}
+          placeholder={column.placeholder}
+          className={commonClassName}
+          onChange={(e) => onChange(e.target.value)}
+        />
       );
   }
 }
@@ -332,7 +349,24 @@ function buildRowActionDefinitions<TData extends object>(args: {
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   }
 > {
-  const { row, rowId, compact, actionsConfig, onOpen, onCopy, onDownload, onMail, onAuth, onPdf, onPrint, onKanban, startEdit, deleteRow, trackAction, withStop } = args;
+  const {
+    row,
+    rowId,
+    compact,
+    actionsConfig,
+    onOpen,
+    onCopy,
+    onDownload,
+    onMail,
+    onAuth,
+    onPdf,
+    onPrint,
+    onKanban,
+    startEdit,
+    deleteRow,
+    trackAction,
+    withStop,
+  } = args;
 
   const enabled = actionsConfig.enabled ?? {};
   const tooltips = {
@@ -466,7 +500,8 @@ function ActionButtons<TData extends object>(props: {
   deleteRow: (row: TData) => Promise<void>;
   trackAction?: (action: BuiltInRowAction, rowId: RowId, row: TData) => void;
 }) {
-  const { row, rowId, compact, order, actionsConfig, onOpen, onCopy, onDownload, onMail, onAuth, onPdf, onPrint, onKanban, startEdit, deleteRow, trackAction } = props;
+  const { row, rowId, compact, order, actionsConfig, onOpen, onCopy, onDownload, onMail, onAuth, onPdf, onPrint, onKanban, startEdit, deleteRow, trackAction } =
+    props;
 
   const withStop = (handler: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>) => (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -499,7 +534,15 @@ function ActionButtons<TData extends object>(props: {
   return (
     <div className="flex justify-center gap-1">
       {visibleActions.map(({ key, def }) => (
-        <Button key={key} type="button" variant="ghost" size="icon" className={cn(compact ? "h-7 w-7" : "h-8 w-8", def.className)} title={def.title} onClick={def.onClick}>
+        <Button
+          key={key}
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={cn(compact ? "h-7 w-7" : "h-8 w-8", def.className)}
+          title={def.title}
+          onClick={def.onClick}
+        >
           {def.icon}
         </Button>
       ))}
@@ -522,6 +565,8 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
     searchPlaceholder = "Buscar...",
     compact = true,
     actions,
+
+    headerActions,
 
     allowCreate = false,
     createRowDefault,
@@ -781,7 +826,24 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
         return (actionsConfig.backOrder ?? DEFAULT_BACK_ACTION_ORDER).some((key) => defs[key].visible);
       }) || allowCreate
     );
-  }, [actionsConfig, tableData, getRowId, compact, onOpen, onCopy, onDownload, onMail, onAuth, onPdf, onPrint, onKanban, startEdit, deleteRow, allowCreate, trackRowAction]);
+  }, [
+    actionsConfig,
+    tableData,
+    getRowId,
+    compact,
+    onOpen,
+    onCopy,
+    onDownload,
+    onMail,
+    onAuth,
+    onPdf,
+    onPrint,
+    onKanban,
+    startEdit,
+    deleteRow,
+    allowCreate,
+    trackRowAction,
+  ]);
 
   const tableColumns = React.useMemo<ColumnDef<TData>[]>(() => {
     const mapped: ColumnDef<TData>[] = [];
@@ -834,7 +896,13 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
           const align = getColumnAlign(column);
 
           return (
-            <div className={cn("flex items-center gap-2", getAlignClass(align), align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start")}>
+            <div
+              className={cn(
+                "flex items-center gap-2",
+                getAlignClass(align),
+                align === "right" ? "justify-end" : align === "center" ? "justify-center" : "justify-start",
+              )}
+            >
               <Button
                 type="button"
                 variant="ghost"
@@ -861,7 +929,13 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
           if (editing && isEditable(column, activeRow)) {
             return (
               <div className={getAlignClass(align)}>
-                <CellEditor row={activeRow} column={column} value={value} compact={compact} onChange={(newValue) => updateDraftValue(column.id, newValue as TData[keyof TData])} />
+                <CellEditor
+                  row={activeRow}
+                  column={column}
+                  value={value}
+                  compact={compact}
+                  onChange={(newValue) => updateDraftValue(column.id, newValue as TData[keyof TData])}
+                />
               </div>
             );
           }
@@ -1056,7 +1130,13 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
 
       return (
         <div className={getAlignClass(align)}>
-          <CellEditor row={createRow} column={column} value={value} compact={compact} onChange={(newValue) => updateCreateValue(column.id, newValue as TData[keyof TData])} />
+          <CellEditor
+            row={createRow}
+            column={column}
+            value={value}
+            compact={compact}
+            onChange={(newValue) => updateCreateValue(column.id, newValue as TData[keyof TData])}
+          />
         </div>
       );
     },
@@ -1070,15 +1150,18 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
           {title ? <h2 className={cn("font-semibold tracking-tight", compact ? "text-sm" : "text-base")}>{title}</h2> : null}
           {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
         </div>
+        <div className="flex items-center gap-2">
+          {headerActions ? <div className="flex flex-nowrap  items-center gap-2">{headerActions}</div> : null}
 
-        {searchable ? (
-          <Input
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder={searchPlaceholder}
-            className={cn("w-full sm:w-64", compact ? "h-8 text-xs" : "h-9 text-sm")}
-          />
-        ) : null}
+          {searchable ? (
+            <Input
+              value={globalFilter ?? ""}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder={searchPlaceholder}
+              className={cn("w-full sm:w-64", compact ? "h-8 text-xs" : "h-9 text-sm")}
+            />
+          ) : null}
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -1233,7 +1316,10 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={table.getAllColumns().length} className={cn("text-center text-muted-foreground", compact ? "h-16 text-xs" : "h-20 text-sm")}>
+                <TableCell
+                  colSpan={table.getAllColumns().length}
+                  className={cn("text-center text-muted-foreground", compact ? "h-16 text-xs" : "h-20 text-sm")}
+                >
                   No hay resultados.
                 </TableCell>
               </TableRow>
@@ -1287,7 +1373,15 @@ export function EditableTable<TData extends object>(props: EditableTableProps<TD
             <ChevronLeft className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
           </Button>
 
-          <Button type="button" variant="outline" size="icon" className={compact ? "h-7 w-7" : "h-8 w-8"} onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} title="Página siguiente">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className={compact ? "h-7 w-7" : "h-8 w-8"}
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            title="Página siguiente"
+          >
             <ChevronRight className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
           </Button>
 

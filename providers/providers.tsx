@@ -19,7 +19,7 @@ const Providers = ({ children }: Readonly<{ children: React.ReactNode }>) => {
         <Provider store={store}>
           <SessionProvider>{children}</SessionProvider>
         </Provider>
-        <ReactQueryDevtools initialIsOpen={true} />
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ThemeProvider>
   );

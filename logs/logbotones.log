@@ -70,3 +70,8 @@
 {"timestamp":"2026-04-08T18:10:57.137Z","buttonId":"editable-table:row-edit","label":"Editar","module":"configuracion/catalogos/Commodity","cod_usuario":"4","extra":{"rowId":6,"row":{"cod_commodity":6,"nombre":"ENERGÍA","descripcion":"Gas natural, carbón o gasolina.","cod_estado":1,"label":"ENERGÍA","value":6}}}
 {"timestamp":"2026-04-08T18:10:58.654Z","buttonId":"editable-table:cancel-edit","label":"Cancelar","module":"configuracion/catalogos/Commodity","cod_usuario":"4","extra":{"rowId":6}}
 {"timestamp":"2026-04-08T18:12:03.599Z","buttonId":"navbar-logo-dashboard","module":"dashboard/ui/navbar","label":"Logo Dashboard","route":"/dashboard","cod_usuario":"4"}
+{"timestamp":"2026-04-15T22:15:42.714Z","buttonId":"navbar-logo-dashboard","module":"dashboard/ui/navbar","label":"Logo Dashboard","route":"/dashboard","cod_usuario":"4"}
+{"timestamp":"2026-04-16T22:16:31.099Z","buttonId":"navbar-logo-dashboard","module":"dashboard/ui/navbar","label":"Logo Dashboard","route":"/dashboard","cod_usuario":"4"}
+{"timestamp":"2026-04-17T15:27:02.091Z","buttonId":"navbar-logo-dashboard","module":"dashboard/ui/navbar","label":"Logo Dashboard","route":"/dashboard","cod_usuario":"4"}
+{"timestamp":"2026-04-20T14:31:10.026Z","buttonId":"navbar-logo-dashboard","module":"dashboard/ui/navbar","label":"Logo Dashboard","route":"/dashboard","cod_usuario":"4"}
+{"timestamp":"2026-04-20T15:27:31.125Z","buttonId":"navbar-logo-dashboard","module":"dashboard/ui/navbar","label":"Logo Dashboard","route":"/dashboard","cod_usuario":"4"}

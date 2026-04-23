@@ -1,30 +1,36 @@
 "use client";
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import clsx from "clsx";
 
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxGroup, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
+import { BaseUIEvent } from "@base-ui/react";
 
 type Key = string | number;
 
-type Props<T> = {
+type Props<T, TOptions = T[]> = {
   id: string;
   label: string;
-  options: T[];
+  options: TOptions;
   value: T | null;
   onChange: (value: T | null) => void;
 
   getOptionValue: (option: T) => Key;
   getOptionLabel: (option: T) => string;
 
+  /**
+   * Permite adaptar options cuando no viene como T[].
+   * Si no se envía, se asume que options ya es un arreglo.
+   */
+  normalizeOptions?: (options: TOptions) => T[];
+
   placeholder?: string;
   errors?: { message: string }[];
   searchFields?: (keyof T)[];
 
-  // ✅ libertad de diseño (pero sin romper handlers)
+  // libertad de diseño
   fieldProps?: React.ComponentProps<typeof Field>;
   labelProps?: React.ComponentProps<typeof FieldLabel>;
   errorProps?: Omit<React.ComponentProps<typeof FieldError>, "errors">;
@@ -33,16 +39,25 @@ type Props<T> = {
   inputProps?: Omit<React.ComponentProps<typeof InputGroupInput>, "id" | "readOnly" | "value" | "placeholder">;
   addonProps?: React.ComponentProps<typeof InputGroupAddon>;
 
-  popoverProps?: Omit<React.ComponentProps<typeof Popover>, "open" | "onOpenChange">;
-  popoverContentProps?: React.ComponentProps<typeof PopoverContent>;
+  comboboxProps?: Omit<React.ComponentProps<typeof Combobox>, "open" | "onOpenChange">;
+  comboboxContentProps?: React.ComponentProps<typeof ComboboxContent>;
+  comboboxInputProps?: React.ComponentProps<typeof ComboboxInput>;
+  comboboxGroupProps?: React.ComponentProps<typeof ComboboxGroup>;
+  comboboxEmptyProps?: React.ComponentProps<typeof ComboboxEmpty>;
 
-  commandProps?: React.ComponentProps<typeof Command>;
-  commandInputProps?: React.ComponentProps<typeof CommandInput>;
-  commandGroupProps?: React.ComponentProps<typeof CommandGroup>;
-  commandEmptyProps?: React.ComponentProps<typeof CommandEmpty>;
+  /** Permite apagar el botón clear. */
+  clearable?: boolean;
+
+  /** Props del botón clear. */
+  clearButtonProps?: React.ComponentProps<typeof InputGroupButton>;
+
+  /** Pone el campo en modo solo lectura, deshabilitando interacciones pero manteniendo estilos. */
+  readOnly?: boolean;
+
+  className?: string;
 };
 
-export const AutoCompleteField = <T,>({
+export const AutoCompleteField = <T, TOptions = T[]>({
   id,
   label,
   options,
@@ -50,7 +65,7 @@ export const AutoCompleteField = <T,>({
   onChange,
   getOptionValue,
   getOptionLabel,
-  searchFields = [],
+  normalizeOptions,
   placeholder = "Seleccionar...",
   errors = [],
 
@@ -58,131 +73,100 @@ export const AutoCompleteField = <T,>({
   labelProps,
   errorProps,
 
-  inputGroupProps,
-  inputProps,
-  addonProps,
+  comboboxContentProps,
+  comboboxGroupProps,
+  comboboxEmptyProps,
 
-  popoverProps,
-  popoverContentProps,
+  clearable = true,
+  clearButtonProps,
 
-  commandProps,
-  commandInputProps,
-  commandGroupProps,
-  commandEmptyProps,
-}: Props<T>) => {
-  const [open, setOpen] = React.useState(false);
+  readOnly = false,
+
+  className,
+}: Props<T, TOptions>) => {
   const [query, setQuery] = React.useState("");
 
-  const selectedLabel = value ? getOptionLabel(value) : "";
+  const canClear = clearable && value !== null;
 
-  // helper para mergear handlers sin pisarlos
-  const callAll =
-    <E,>(...fns: Array<((e: E) => void) | undefined>) =>
-    (e: E) =>
-      fns.forEach((fn) => fn?.(e));
+  const safeOptions = React.useMemo<T[]>(() => {
+    if (normalizeOptions) return normalizeOptions(options);
+    return Array.isArray(options) ? options : [];
+  }, [options, normalizeOptions]);
 
-  const norm = (s: unknown) =>
-    String(s ?? "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+  const handleClear = (ev: React.MouseEvent<HTMLButtonElement> | null) => {
+    ev?.preventDefault();
+    onChange(null);
+    setQuery("");
+  };
 
-  const filteredOptions = React.useMemo(() => {
-    const q = norm(query).trim();
-    if (!q) return options;
+  const handleSelect = React.useCallback(
+    (currentValue: unknown) => {
+      const selectedValue = String(currentValue ?? "");
 
-    return options.filter((opt) => {
-      const key = String(getOptionValue(opt));
-      const optLabel = getOptionLabel(opt);
-      const extras = searchFields.map((f) => String(opt[f] ?? ""));
-      const haystack = norm([optLabel, key, ...extras].join(" "));
-      return haystack.includes(q);
-    });
-  }, [options, query, getOptionValue, getOptionLabel, searchFields]);
+      const selected = safeOptions.find((o) => String(getOptionValue(o)) === selectedValue) ?? null;
+
+      onChange(selected);
+      setQuery("");
+    },
+    [safeOptions, getOptionValue, onChange],
+  );
 
   return (
-    <Field {...fieldProps}>
+    <Field {...fieldProps} className={clsx("w-full", fieldProps?.className, readOnly && "cursor-not-allowed opacity-70")}>
       <FieldLabel htmlFor={id} {...labelProps}>
         {label}
       </FieldLabel>
 
-      <Popover open={open} onOpenChange={setOpen} {...popoverProps}>
-        {/* anchor */}
-        <PopoverAnchor asChild>
-          <div>
-            <InputGroup {...inputGroupProps}>
-              <InputGroupInput
-                id={id}
-                readOnly
-                value={selectedLabel}
-                placeholder={placeholder}
-                // ✅ tu lógica intacta + permite custom handler
-                onMouseDown={callAll<React.MouseEvent<HTMLInputElement>>((e) => {
-                  e.preventDefault();
-                  setOpen(true);
-                }, inputProps?.onMouseDown)}
-                {...inputProps}
-              />
-
-              <InputGroupAddon
-                className={clsx("cursor-pointer", addonProps?.className)}
-                // ✅ tu lógica intacta + permite custom handler
-                onMouseDown={callAll<React.MouseEvent<HTMLDivElement>>((e) => {
-                  e.preventDefault();
-                  setOpen((prev) => !prev);
-                }, addonProps?.onMouseDown)}
-                {...addonProps}
+      <Combobox readOnly={readOnly} items={safeOptions} value={value} onValueChange={handleSelect} itemToStringValue={getOptionLabel}>
+        <ComboboxInput id={id}>
+          {/* right addon */}
+          {!(!canClear || clearButtonProps?.disabled) && (
+            <InputGroupAddon className={clsx("gap-1")} align="inline-end">
+              <InputGroupButton
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Clear input"
+                // ✅ evita blur / efectos raros
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  clearButtonProps?.onClick?.(e);
+                  handleClear(e);
+                }}
+                disabled={!canClear || clearButtonProps?.disabled}
+                {...clearButtonProps}
+                className={` hover:bg-transparent hover:text-destructive cursor-pointer ${clearButtonProps?.className}`}
               >
-                {addonProps?.children ?? <ChevronsUpDown className="h-4 w-4" />}
-              </InputGroupAddon>
-            </InputGroup>
-          </div>
-        </PopoverAnchor>
+                <X className="h-4 w-4" />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
+        </ComboboxInput>
 
-        <PopoverContent
-          align="start"
-          className={clsx("w-[--radix-popover-trigger-width] p-0", popoverContentProps?.className)}
-          onOpenAutoFocus={callAll<Event>((e) => e.preventDefault(), popoverContentProps?.onOpenAutoFocus)}
-          onCloseAutoFocus={callAll<Event>((e) => e.preventDefault(), popoverContentProps?.onCloseAutoFocus)}
-          {...popoverContentProps}
-        >
-          <Command {...commandProps} shouldFilter={false}>
-            <div className="flex items-center border-b px-3">
-              <CommandInput placeholder="Buscar..." {...commandInputProps} value={query} onValueChange={(v: string) => setQuery(v)} />
-            </div>
+        <ComboboxContent className={clsx(" p-0", comboboxContentProps?.className)} {...comboboxContentProps}>
+          {/* Search input interno del combobox */}
 
-            <CommandEmpty {...commandEmptyProps}>No encontrado</CommandEmpty>
+          <ComboboxEmpty {...comboboxEmptyProps}>No encontrado</ComboboxEmpty>
 
-            <CommandGroup {...commandGroupProps}>
-              {filteredOptions.map((opt) => {
-                const key = String(getOptionValue(opt));
-                const isSelected = value ? String(getOptionValue(value)) === key : false;
+          <ComboboxList>
+            {(opt) => {
+              const key = String(getOptionValue(opt));
+              const isSelected = value ? String(getOptionValue(value)) === key : false;
 
-                return (
-                  <CommandItem
-                    key={key}
-                    value={key}
-                    // ✅ tu preventDefault intacto + permite custom handler
-                    onMouseDown={callAll<React.MouseEvent>(
-                      (e) => e.preventDefault(),
-                      undefined, // (CommandItem no siempre tipa onMouseDown; lo dejo explícito abajo)
-                    )}
-                    onSelect={(currentValue: string) => {
-                      const selected = options.find((o) => String(getOptionValue(o)) === currentValue) ?? null;
-                      onChange(selected);
-                      setOpen(false);
-                      setQuery("");
-                    }}
-                  >
-                    {getOptionLabel(opt)}
-                    {isSelected && <Check className="ml-auto h-4 w-4" />}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
+              return (
+                <ComboboxItem
+                  key={key}
+                  value={key}
+                  className={clsx("cursor-pointer", isSelected && "bg-primary/20", "hover:bg-primary/10")}
+                  {...(isSelected && { "aria-selected": true })}
+                >
+                  {getOptionLabel(opt)}
+                </ComboboxItem>
+              );
+            }}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
 
       <FieldError errors={errors} {...errorProps} />
     </Field>

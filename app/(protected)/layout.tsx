@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <main className="flex flex-1 min-w-0 min-h-0 flex-col overflow-hidden pl-2 relative">
                 {/* área que sí puede scrollear */}
                 <div className="flex-1 min-h-0 overflow-auto pt-2 pb-16 justify-center items-center">
-                  <div className="xl2:max-w-7xl xl:max-w-6xl lg:max-w-5xl md:max-w-4xl mx-auto">{children}</div>
+                  <div className="xl2:max-w-7xl xl:max-w-7xl lg:max-w-5xl md:max-w-4xl mx-auto">{children}</div>
                 </div>
 
                 {/* footer visual fijo */}

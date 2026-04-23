@@ -1,27 +1,20 @@
-Sí. Eso era exactamente lo que debí hacer: **agarrar esa versión base y solo agregarle lo nuevo**, sin reescribir lo demás.
-Tu base es esta. 
-
-Aquí te dejo el **MD completo**, tomando esa versión como base y **solo agregando** la parte de CRUD simple con `EditableTable`, respetando la redacción original lo más posible.
-
----
-
 # 📘 Frontend Contract – Formularios + Catálogos + TanStack + Zod
 
 ## 🎯 Objetivo
 
 Estandarizar la forma en que se construyen:
 
-* Formularios reutilizables
-* Catálogos con TanStack Query
-* Validaciones con Zod
-* Transformaciones de datos (UI ↔ API)
-* CRUD simples con EditableTable
+- Formularios reutilizables
+- Catálogos con TanStack Query
+- Validaciones con Zod
+- Transformaciones de datos (UI ↔ API)
+- CRUD simples con EditableTable
 
 Para:
 
-* evitar duplicación de código
-* reducir mantenimiento
-* mantener consistencia entre módulos
+- evitar duplicación de código
+- reducir mantenimiento
+- mantener consistencia entre módulos
 
 ---
 
@@ -53,8 +46,8 @@ modules/
 
 ## 1. El formulario es reutilizable
 
-* NO pertenece a un módulo
-* NO contiene lógica hardcodeada por pantalla
+- NO pertenece a un módulo
+- NO contiene lógica hardcodeada por pantalla
 
 ❌ Incorrecto:
 
@@ -65,9 +58,9 @@ if (modulo === "tarifa") { ... }
 ✅ Correcto:
 
 ```ts
-props.config
-props.inputsToHide
-props.inputsReadOnly
+props.config;
+props.inputsToHide;
+props.inputsReadOnly;
 ```
 
 ---
@@ -81,9 +74,9 @@ const [values, setValues] = useState<FormValues>();
 ❌ NO usar:
 
 ```ts
-valuesServicio
-valuesMetodo
-valuesFiltro
+valuesServicio;
+valuesMetodo;
+valuesFiltro;
 ```
 
 ✅ Separación SOLO al final:
@@ -149,7 +142,7 @@ export function formToPayload(values) {
 ```ts
 export function apiToForm(item, catalogos) {
   return {
-    empresa: catalogos.empresas.find(e => e.value === item.cod_empresa),
+    empresa: catalogos.empresas.find((e) => e.value === item.cod_empresa),
   };
 }
 ```
@@ -170,10 +163,12 @@ Ejemplo:
 import { z } from "zod";
 
 export const formSchema = z.object({
-  empresa: z.object({
-    label: z.string(),
-    value: z.number(),
-  }).nullable(),
+  empresa: z
+    .object({
+      label: z.string(),
+      value: z.number(),
+    })
+    .nullable(),
 
   nombre: z.string().min(1, "Requerido"),
 
@@ -194,15 +189,9 @@ fetch/modulo/catalogos.ts
 Ejemplo:
 
 ```ts
-export const fetchEmpresas = createCatalogFetcher(
-  "/api/appweb/listaempresas",
-  mapEmpresa
-);
+export const fetchEmpresas = createCatalogFetcher("/api/appweb/listaempresas", mapEmpresa);
 
-export const useFetchEmpresas = createCatalogHook(
-  "empresas",
-  fetchEmpresas
-);
+export const useFetchEmpresas = createCatalogHook("empresas", fetchEmpresas);
 ```
 
 ---
@@ -210,13 +199,9 @@ export const useFetchEmpresas = createCatalogHook(
 ## 7. Mutations (insert/update)
 
 ```ts
-export const insertarTarifa = createCatalogMutationFetcher<
-  InsertBody,
-  Response
->("/api/appweb/insertar", "POST");
+export const insertarTarifa = createCatalogMutationFetcher<InsertBody, Response>("/api/appweb/insertar", "POST");
 
-export const useInsertarTarifa =
-  createCatalogMutationHook("insertar_tarifa", insertarTarifa);
+export const useInsertarTarifa = createCatalogMutationHook("insertar_tarifa", insertarTarifa);
 ```
 
 ---
@@ -280,7 +265,7 @@ const disabled = inputsReadOnly.includes(field.id);
 
 ```ts
 const onInput = (name, value) => {
-  setValues(prev => ({
+  setValues((prev) => ({
     ...prev,
     [name]: value,
   }));
@@ -313,12 +298,12 @@ NO en JSX.
 
 Usar `EditableTable` cuando el caso sea un CRUD simple, por ejemplo:
 
-* catálogo simple
-* edición inline
-* create / update / delete directo
-* sin payloads múltiples
-* sin reglas complejas de visibilidad
-* sin dependencias fuertes entre campos
+- catálogo simple
+- edición inline
+- create / update / delete directo
+- sin payloads múltiples
+- sin reglas complejas de visibilidad
+- sin dependencias fuertes entre campos
 
 ---
 
@@ -329,16 +314,16 @@ En CRUD simple, la tabla se usa como componente base y NO se modifica.
 Los eventos se usan así:
 
 ```ts
-onCreate(newRow)
-onSave(rowId, updatedRow)
-onDelete(rowId, row)
+onCreate(newRow);
+onSave(rowId, updatedRow);
+onDelete(rowId, row);
 ```
 
 ### Regla importante
 
-* `onCreate` = crear fila nueva
-* `onSave` = editar fila existente
-* `onDelete` = eliminar fila
+- `onCreate` = crear fila nueva
+- `onSave` = editar fila existente
+- `onDelete` = eliminar fila
 
 👉 `onCreate` NO es lo mismo que `onSave`.
 
@@ -392,13 +377,13 @@ onDelete(rowId, row)
 
 Solo se adapta:
 
-* `columns`
-* `useFetchX`
-* `useInsertarX`
-* `useActualizarX`
-* `onCreate`
-* `onSave`
-* `onDelete`
+- `columns`
+- `useFetchX`
+- `useInsertarX`
+- `useActualizarX`
+- `onCreate`
+- `onSave`
+- `onDelete`
 
 ---
 
@@ -451,11 +436,11 @@ return { error: true };
 
 NO usar `EditableTable` si el caso requiere:
 
-* múltiples payloads
-* transformaciones complejas
-* reglas dinámicas de visibilidad
-* catálogos dependientes
-* lógica fuerte entre campos
+- múltiples payloads
+- transformaciones complejas
+- reglas dinámicas de visibilidad
+- catálogos dependientes
+- lógica fuerte entre campos
 
 👉 En esos casos usar formulario completo.
 
@@ -491,8 +476,8 @@ if (tipoFormulario === "x")
 ## ❌ Estados separados por payload
 
 ```ts
-valuesServicio
-valuesMetodo
+valuesServicio;
+valuesMetodo;
 ```
 
 ---
@@ -564,16 +549,16 @@ Usar como base:
 
 porque ya separa:
 
-* reglas
-* payloads
-* catálogo
-* lógica
+- reglas
+- payloads
+- catálogo
+- lógica
 
 Y para CRUD simple, usar como base el patrón de `EditableTable` con:
 
-* `onCreate`
-* `onSave`
-* `onDelete`
+- `onCreate`
+- `onSave`
+- `onDelete`
 
 ---
 
@@ -588,8 +573,3 @@ Y en CRUD simple:
 > solo se adapta su uso.
 
 ---
-
-```
-
-Si quieres, te lo paso también como `.md` descargable usando **esta versión exacta**.
-```

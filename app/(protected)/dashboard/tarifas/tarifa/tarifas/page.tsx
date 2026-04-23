@@ -1,8 +1,8 @@
+import CracionTarifas from "@/modules/pricing/tarifa/tarifa/view/CracionTarifas";
 import React from "react";
-import TarifaFormulario from "@/modules/pricing/tarifa/tarifa/components/tarifaFormulario";
 
 const page = () => {
-  return <TarifaFormulario />;
+  return <CracionTarifas />;
 };
 
 export default page;

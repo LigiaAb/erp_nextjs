@@ -373,15 +373,15 @@ export default function ContextForm({ onDone }: ContextFormProps) {
 
         <div className="flex p-5 transition-all sm:flex-col items-center justify-center w-full space-2">
           {step === 4 ?
-            <div className="justify-arrownd items-center transition-all rounded-sm p-2">
+            <div className="justify-arrownd items-center transition-all rounded-sm p-2  w-full">
               <h2 className="text-2xl">¿Que acciones planea realizar?</h2>
-              <div className="flex flex-col items-start mt-5 space-y-3">
-                <FieldGroup>
-                  <Field className="flex flex-col items-center space-x-2">
-                    <div className="flex" ><Checkbox /></div>
+              <div className="flex flex-col items-start mt-5 space-y-3 w-full">
+                <div>
+                  <Field>
+                    <Checkbox />
                     <FieldLabel className="text-lg">- Visualizar información</FieldLabel>
                   </Field>
-                </FieldGroup>
+                </div>
                 <span className="text-lg">- Consultar reportes</span>
                 <span className="text-lg">- Descargar información</span>
                 <span className="text-lg">- Configurar alertas</span>
